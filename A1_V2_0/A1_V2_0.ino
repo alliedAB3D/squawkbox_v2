@@ -139,9 +139,7 @@ void setup() {
   sendSMS(urlHeaderArray, contactFromArray1, contactToArray2, SetCombody);
   //sendSMS(urlHeaderArray, contactFromArray1, contactToArray3, SetCombody);
   delay(2000);
-
   Serial.println(F("Setup complete. Entering main loop"));
-
 }
 void loop()
 {
