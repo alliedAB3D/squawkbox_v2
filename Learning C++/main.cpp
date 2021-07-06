@@ -10,11 +10,11 @@ int main()
     cout << "Customer Boiler Is: " << boiler << endl;
     if(boiler == "Hurst")
 {
-        cout << "bad choice" << endl;
+        cout << "bad choice these suck" << endl;
     }
     else
 {
-        cout << "Good Choice" << endl;
+        cout << "Good Choice these are awesome" << endl;
     }
 
 
