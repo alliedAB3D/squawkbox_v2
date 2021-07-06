@@ -272,7 +272,6 @@ void secondary_LW()
   }
   else
   {
-
     if ((secondaryCutoff == LOW) || (counter2 == 1))
     {
       alarmSwitch2 = false;
