@@ -187,6 +187,9 @@ void resetCounters()
   }
   if ((hlpcCOMMON == HIGH) && (hlpcNC == HIGH))
   {
+    alarmSwitch4 = false;
+    difference4 = 0;
+    alarmTime4 = 0;
     counter4 = 0;
   }
   //this next line may not be necessary, but I think it will help prevent against false alarms on HPLC
