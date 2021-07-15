@@ -1,13 +1,16 @@
 #include <SD.h>
 #include <ModbusMaster.h>
 File myFile;
-const int low1 = 5;
-const int low2 = 6;
-const int alarmPin = 8;
-const int MAX485_DE = 3;
-const int MAX485_RE_NEG = 2;
-const int SIMpin = A3;
-const int debounceInterval = 3000;
+//The following const int pins are all pre-run in the PCB:
+const int low1 = 5;  //to screw terminal
+const int low2 = 6;   //to screw terminal
+const int alarmPin = 8;   //to screw terminal
+const int MAX485_DE = 3;  //to modbus module
+const int MAX485_RE_NEG = 2;   //to modbus module
+const int SIMpin = A3;  // this pin is routed to SIM pin 12 for boot (DF Robot SIM7000A module)
+const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.  
+//Setting this debounce too high will prevent the annunciation of instantaneous alarms like a bouncing LWC.
+
 int primaryCutoff;
 int counter1;
 int secondaryCutoff;
@@ -20,9 +23,7 @@ int hplcOUT = 15;
 int hlpcCOMMON;
 int hlpcNC;
 int counter4;
-//char urlHeaderArray[] = "AT+HTTPPARA=\"URL\",\"http://relay-post-8447.twil.io/secondary-low-water?";
-//char URLfrom[] = "From=%2b19049808059&";
-//char contactToArray1[] = "To=%2b17065755866&";
+
 char SetCombody[] = "Body=Setup%20Complete\"\r";
 char LWbody[] = "Body=Low%20Water\"\r";
 char LW2body[] = "Body=Low%20Water2\"\r";
