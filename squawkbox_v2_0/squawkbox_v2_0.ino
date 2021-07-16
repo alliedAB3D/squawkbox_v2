@@ -17,7 +17,6 @@ int secondaryCutoff;
 int counter2;
 int alarm;
 int counter3;
-int SIMbuttState;
 int hplcIN = 14;
 int hplcOUT = 15;
 int hlpcCOMMON;
@@ -605,7 +604,7 @@ void loadContacts()
 
   myFile = SD.open("to3.txt");
   if (myFile) {
-    Serial.println("phone number 3 command");
+    Serial.println(F("loading third contact number"));
     // read from the file until there's nothing else in it:
     while (myFile.available()) {
       char c = myFile.read();  //gets one byte from serial buffer
@@ -614,7 +613,7 @@ void loadContacts()
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening to3.txt");
+    Serial.println(F("error opening to3.txt"));
   }
 
   conTo1.toCharArray(contactToArray3, 25);
@@ -637,7 +636,7 @@ void loadContacts()
     myFile.close();
   } else {
     // if the file didn't open, print an error:
-    Serial.println("error opening URL.txt");
+    Serial.println(F("error opening URL.txt"));
   }
 
   URLheader.toCharArray(urlHeaderArray, 100);
