@@ -1,15 +1,14 @@
 #include <SD.h>
 #include <ModbusMaster.h>
 File myFile;
-
-const int hardLow = 4;
+//The following const int pins are all pre-run in the PCB:
 const int low1 = 5;  //to screw terminal
 const int low2 = 6;   //to screw terminal
 const int alarmPin = 8;   //to screw terminal
 const int MAX485_DE = 3;  //to modbus module
 const int MAX485_RE_NEG = 2;   //to modbus module
 const int SIMpin = A3;  // this pin is routed to SIM pin 12 for boot (DF Robot SIM7000A module)
-const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.
+const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.  
 //Setting this debounce too high will prevent the annunciation of instantaneous alarms like a bouncing LWC.
 
 int primaryCutoff;
@@ -28,10 +27,9 @@ char SetCombody[] = "Body=Setup%20Complete\"\r";
 char LWbody[] = "Body=Low%20Water\"\r";
 char LW2body[] = "Body=Low%20Water2\"\r";
 char REPbody[] = "Body=routine%20timer\"\r";
-char Rebody[] = "Body=reboot%20complete\"\r";
 char HLPCbody[] = "Body=High%20Pressure%20Alarm\"\r";
 char CHECKbody[] = "Body=good%20check\"\r";
-char BCbody[] = "Body=Boiler%20Down%20on%20Burner%20Control\"\r";
+char BCbody[] = "Body=Boiler%20Down\"\r";
 char fault1[] = "Body=Fault%20Code1%20No%20Purge%20Card\"\r";
 
 String URLheader = "";
@@ -57,7 +55,7 @@ unsigned long difference3 = 0;
 unsigned long difference4 = 0;
 unsigned long difference5 = 0;
 unsigned long fifmintimer = 900000;
-unsigned long twomintimer = 120000;
+unsigned long fivmintimer = 300000;
 unsigned long dailytimer = 86400000;
 unsigned long msgtimer1 = 0;
 unsigned long alarmTime = 0;
@@ -78,11 +76,10 @@ void setup() {
 
   Serial.begin(9600);
   Serial1.begin(19200);
-  Serial.println(F("This is demo_box_2.ino sketch.  Made for Ft. Campbell 19JULY21."));
-  pinMode(hardLow, OUTPUT);
-  digitalWrite(hardLow, LOW);
-  pinMode(low1, INPUT_PULLUP); //NOTE// for the demo sketch, these are input_pullups and being pulled to ground!
-  pinMode(low2, INPUT_PULLUP);
+  Serial.println(F("This is A1_V2.0.1 sketch."));
+
+  pinMode(low1, INPUT);
+  pinMode(low2, INPUT);
   pinMode(alarmPin, INPUT);
   pinMode(hplcIN, INPUT);
   pinMode(hplcOUT, INPUT);
@@ -95,14 +92,14 @@ void setup() {
   node.begin(1, Serial);
   node.preTransmission(preTransmission);
   node.postTransmission(postTransmission);
-  Serial.println(F("Booting SIM module. 12 seconds until SD card contact pull."));
-  SIMboot();
 
-  delay(8000);
+  SIMboot();
+  // Give time to your GSM shield log on to network
+  delay(15000);
 
   loadContacts();
   Serial.println(F("Contacts Loaded.  Booting SIM module.  Initiating wakeup sequence..."));
-  delay(1000);
+  delay(2000);
   //PUT SIM MODULE WAKEUP HERE
   Serial.println("Hey!  Wake up!");
   Serial1.print("AT\r"); //Manufacturer identification
@@ -139,7 +136,6 @@ void setup() {
   delay(100);
   getResponse();
   sendSMS(urlHeaderArray, contactFromArray1, contactToArray1, SetCombody);
-  delay(2000);
   sendSMS(urlHeaderArray, contactFromArray1, contactToArray2, SetCombody);
   //sendSMS(urlHeaderArray, contactFromArray1, contactToArray3, SetCombody);
   delay(2000);
@@ -158,17 +154,16 @@ void loop()
 
   resetCounters();
   primary_LW();
-  secondary_LW(); //for the purposes of the demo box, this is simulating raw burner controller alarm instead of 2LW
-  //Honeywell_alarm();
-  //HPLC();
-  //timedmsg();
-  reboot();
+  secondary_LW();
+  Honeywell_alarm();
+  HPLC();
+  timedmsg();
   SMSRequest();
 }
 
 void resetCounters()
 {
-  if (primaryCutoff == HIGH)
+  if (primaryCutoff == LOW)
   {
     alarmSwitch = false;
     difference = 0;
@@ -176,7 +171,7 @@ void resetCounters()
     counter1 = 0;
 
   }
-  if (secondaryCutoff == HIGH)
+  if (secondaryCutoff == LOW)
   {
     alarmSwitch2 = false;
     difference2 = 0;
@@ -203,7 +198,7 @@ void resetCounters()
 
 void primary_LW()
 {
-  if ((primaryCutoff == LOW) && (counter1 == 0))
+  if ((primaryCutoff == HIGH) && (counter1 == 0))
   {
     if (alarmSwitch == false)
     {
@@ -236,7 +231,7 @@ void primary_LW()
   else
   {
 
-    if ((primaryCutoff == HIGH) || (counter1 == 1))
+    if ((primaryCutoff == LOW) || (counter1 == 1))
     {
       alarmSwitch = false;
       difference = 0;
@@ -248,7 +243,7 @@ void primary_LW()
 
 void secondary_LW()
 {
-  if ((secondaryCutoff == LOW) && (counter2 == 0))
+  if ((secondaryCutoff == HIGH) && (counter2 == 0))
   {
     if (alarmSwitch2 == false)
     {
@@ -261,8 +256,8 @@ void secondary_LW()
     if ( difference2 >= debounceInterval)
     {
       Serial.println(F("Secondary low water.  Sending message."));
-      sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, BCbody);
-      sendSMS(urlHeaderArray, contactToArray2, contactFromArray1, BCbody);
+      sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, LW2body);
+      sendSMS(urlHeaderArray, contactToArray2, contactFromArray1, LW2body);
       //sendSMS(urlHeaderArray, contactToArray3, contactFromArray1, LW2body);
       Serial.println(F("message sent or simulated"));
       delay(10);
@@ -280,7 +275,7 @@ void secondary_LW()
   else
   {
 
-    if ((secondaryCutoff == HIGH) || (counter2 == 1))
+    if ((secondaryCutoff == LOW) || (counter2 == 1))
     {
       alarmSwitch2 = false;
       difference2 = 0;
@@ -386,7 +381,7 @@ void sendSMS(char pt1[], char pt2[], char pt3[], char pt4[])
 {
 
   char finalURL[250] = "";
-
+  
   strcpy(finalURL, pt1);
   strcat(finalURL, pt2);
   strcat(finalURL, pt3);
@@ -411,10 +406,10 @@ void sendSMS(char pt1[], char pt2[], char pt3[], char pt4[])
   delay(100);
   getResponse();
   Serial1.println(finalURL);
-  delay(1000);
+  delay(100);
   getResponse();
   Serial1.print("AT+HTTPACTION=1\r");
-  delay(6000);
+  delay(5000);
   getResponse();
 
   getResponse();
@@ -447,34 +442,6 @@ void timedmsg()
   if (difference5 >= dailytimer)
   {
     sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, REPbody);
-    difference5 = 0;
-    msgswitch = false;
-    msgtimer1 = 0;
-  }
-}
-
-void reboot()
-{
-
-  if (msgswitch == false)
-  {
-    msgtimer1 = currentMillis;
-    msgswitch = true;
-
-  }
-  difference5 = currentMillis - msgtimer1;
-
-  if (difference5 >= twomintimer)
-  {
-    SIMboot();
-    delay(3000);
-    SIMboot();
-    delay(4000);
-    Serial1.print("AT+CMGF=1\r");
-    delay(100);
-    Serial1.print("AT+CNMI=2,2,0,0,0\r");
-    delay(100);
-    sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, Rebody);
     difference5 = 0;
     msgswitch = false;
     msgtimer1 = 0;
