@@ -9,11 +9,9 @@ const int alarmPin = 8;   //to screw terminal
 const int MAX485_DE = 3;  //to modbus module
 const int MAX485_RE_NEG = 2;   //to modbus module
 const int SIMpin = A3;  // this pin is routed to SIM pin 12 for boot (DF Robot SIM7000A module)
-<<<<<<< HEAD
+ 
 const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.
-=======
-const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.  
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
+  
 //Setting this debounce too high will prevent the annunciation of instantaneous alarms like a bouncing LWC.
 
 int primaryCutoff;
@@ -32,10 +30,9 @@ char SetCombody[] = "Body=Setup%20Complete\"\r";
 char LWbody[] = "Body=Low%20Water\"\r";
 char LW2body[] = "Body=Low%20Water2\"\r";
 char REPbody[] = "Body=routine%20timer\"\r";
-<<<<<<< HEAD
+ 
 char Rebody[] = "Body=reboot%20complete\"\r";
-=======
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
+  
 char HLPCbody[] = "Body=High%20Pressure%20Alarm\"\r";
 char CHECKbody[] = "Body=good%20check\"\r";
 char BCbody[] = "Body=Boiler%20Down%20on%20Burner%20Control\"\r";
@@ -64,11 +61,10 @@ unsigned long difference3 = 0;
 unsigned long difference4 = 0;
 unsigned long difference5 = 0;
 unsigned long fifmintimer = 900000;
-<<<<<<< HEAD
+ 
 unsigned long twomintimer = 120000;
-=======
+  
 unsigned long fivmintimer = 300000;
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
 unsigned long dailytimer = 86400000;
 unsigned long msgtimer1 = 0;
 unsigned long alarmTime = 0;
@@ -86,20 +82,18 @@ ModbusMaster node;
 
 
 void setup() {
-<<<<<<< HEAD
+ 
 
-=======
   
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
+  
   Serial.begin(9600);
   Serial1.begin(19200);
   Serial.println(F("This is demo_box_2.ino sketch.  Made for Ft. Campbell 19JULY21."));
   pinMode(hardLow, OUTPUT);
-<<<<<<< HEAD
+ 
   digitalWrite(hardLow, LOW);
-=======
+  
   digitalWrite(hardLow,LOW);
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
   pinMode(low1, INPUT_PULLUP); //NOTE// for the demo sketch, these are input_pullups and being pulled to ground!
   pinMode(low2, INPUT_PULLUP);
   pinMode(alarmPin, INPUT);
@@ -116,13 +110,12 @@ void setup() {
   node.postTransmission(postTransmission);
   Serial.println(F("Booting SIM module. 12 seconds until SD card contact pull."));
   SIMboot();
-<<<<<<< HEAD
+ 
 
   delay(8000);
-=======
+  
   
   delay(10000);
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
 
   loadContacts();
   Serial.println(F("Contacts Loaded.  Booting SIM module.  Initiating wakeup sequence..."));
@@ -186,10 +179,9 @@ void loop()
   //Honeywell_alarm();
   //HPLC();
   //timedmsg();
-<<<<<<< HEAD
+ 
   reboot();
-=======
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
+  
   SMSRequest();
 }
 
@@ -413,12 +405,11 @@ void sendSMS(char pt1[], char pt2[], char pt3[], char pt4[])
 {
 
   char finalURL[250] = "";
-<<<<<<< HEAD
+ 
 
-=======
   
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
-  strcpy(finalURL, pt1);
+  
+ strcpy(finalURL, pt1);
   strcat(finalURL, pt2);
   strcat(finalURL, pt3);
   strcat(finalURL, pt4);
@@ -484,7 +475,7 @@ void timedmsg()
   }
 }
 
-<<<<<<< HEAD
+ 
 void reboot()
 {
 
@@ -513,8 +504,7 @@ void reboot()
   }
 }
 
-=======
->>>>>>> 41e7ab214b4cd0a0ef6f9e4b9c0aa96f86b22ff4
+  
 
 void SMSRequest()
 {
