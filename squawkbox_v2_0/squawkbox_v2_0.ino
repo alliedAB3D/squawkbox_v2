@@ -76,7 +76,7 @@ void setup() {
 
   Serial.begin(9600);
   Serial1.begin(19200);
-  Serial.println(F("This is A1_V2.0.1 sketch."));
+  Serial.println(F("This is squawkbox v2.0 sketch."));
 
   pinMode(low1, INPUT);
   pinMode(low2, INPUT);
@@ -439,7 +439,7 @@ void timedmsg()
   }
   difference5 = currentMillis - msgtimer1;
 
-  if (difference5 >= dailytimer)
+  if (difference5 >= fivmintimer)
   {
     sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, REPbody);
     difference5 = 0;
@@ -616,7 +616,7 @@ void loadContacts()
     Serial.println(F("error opening to3.txt"));
   }
 
-  conTo1.toCharArray(contactToArray3, 25);
+  conTo3.toCharArray(contactToArray3, 25);
   Serial.print(F("The third phone number TO String is "));
   Serial.println(conTo3);
   Serial.print(F("The third phone number TO char array is "));
