@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-//I am batman for reals
-=======
-//no you are not
->>>>>>> 573a5b2dfd0761e8a243ad705a4cd0f32bb289e4
+
 
 #include <SD.h>;
 
