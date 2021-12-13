@@ -416,6 +416,7 @@ void sendSMS(char pt1[], char pt2[], char pt3[], char pt4[])
 }
 void getResponse()
 {
+  //comment here
   if (Serial1.available())
   {
     while (Serial1.available())
