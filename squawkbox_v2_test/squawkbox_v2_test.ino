@@ -2,7 +2,7 @@
 #include <ModbusMaster.h>
 File myFile;
 
-// clintons test push
+// clintons test push 2
 //The following const int pins are all pre-run in the PCB:
 const int low1 = 5;  //to screw terminal
 const int low2 = 6;   //to screw terminal
