@@ -1,25 +1,28 @@
-//Clinton's update #2
 #include <SD.h>
 #include <ModbusMaster.h>
 File myFile;
 //The following const int pins are all pre-run in the PCB:
-const int low1 = 5;  //to screw terminal
-const int low2 = 6;   //to screw terminal
-const int alarmPin = 8;   //to screw terminal
+const int low1 = 5;  
+const int low2 = 6;   
+const int alarmPin = 8;   //honeywell alarm terminal (terminal 3 on honeywell)
+const int hplcIN = 14;
+const int hplcOUT = 15;
 const int MAX485_DE = 3;  //to modbus module
 const int MAX485_RE_NEG = 2;   //to modbus module
 const int SIMpin = A3;  // this pin is routed to SIM pin 12 for boot (DF Robot SIM7000A module)
-const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.  
-//Setting this debounce too high will prevent the annunciation of instantaneous alarms like a bouncing LWC.
 
+
+const int debounceInterval = 3000;  //to prevent false alarms from electrical noise.
+//Setting this debounce too high will prevent the annunciation of instantaneous alarms like a bouncing LWCO.
+//NEEDS TO BE MADE CHANGEABLE ON SD CARD
+
+//declare state-reading variables
 int primaryCutoff;
 int counter1;
 int secondaryCutoff;
 int counter2;
 int alarm;
 int counter3;
-int hplcIN = 14;
-int hplcOUT = 15;
 int hlpcCOMMON;
 int hlpcNC;
 int counter4;
@@ -95,47 +98,53 @@ void setup() {
   node.postTransmission(postTransmission);
 
   SIMboot();
-  // Give time to your GSM shield log on to network
-  delay(15000);
 
-  loadContacts();
+  // Give time for the SIM module to turn on and wake up
+  delay(8000);
+
+  loadContacts(); //run the SD card function.
+
   Serial.println(F("Contacts Loaded.  Booting SIM module.  Initiating wakeup sequence..."));
   delay(2000);
-  //PUT SIM MODULE WAKEUP HERE
+  //The remainder of the setup is for waking the
+  //SIM module, logging on, and sending the first
+  //test message to verify proper booting
   Serial.println("Hey!  Wake up!");
-  Serial1.print("AT\r"); //Manufacturer identification
+  Serial1.print("AT\r"); //Toggling this blank AT command elicits a mirror response from the
+  //SIM module and helps to activate it.
   getResponse();
-  Serial1.print("AT\r"); //Manufacturer identification
+  Serial1.print("AT\r");
   getResponse();
-  Serial1.print("AT\r"); //Manufacturer identification
+  Serial1.print("AT\r");
   getResponse();
-  Serial1.print("AT\r"); //Manufacturer identification
+  Serial1.print("AT\r");
   getResponse();
-  Serial1.print("AT\r"); //Manufacturer identification
+  Serial1.print("AT\r");
   getResponse();
   //SIM MODULE SETUP---
-  Serial1.print("AT+CGDCONT=1,\"IP\",\"super\"\r");
+  Serial1.print("AT+CGDCONT=1,\"IP\",\"super\"\r");  //"super" is the key required to log onto the network using Twilio SuperSIM
   delay(500);
   getResponse();
-  Serial1.print("AT+COPS=1,2,\"310410\"\r");
+  Serial1.print("AT+COPS=1,2,\"310410\"\r"); //310410 is AT&T's network code https://www.msisdn.net/mccmnc/310410/
   delay(5000);
   getResponse();
-  Serial1.print("AT+SAPBR=3,1,\"APN\",\"super\"\r");
+  Serial1.print("AT+SAPBR=3,1,\"APN\",\"super\"\r"); //establish SAPBR profile.  APN = "super"
   delay(3000);
   getResponse();
   Serial1.print("AT+SAPBR=1,1\r");
   delay(2000);
   getResponse();
-  Serial1.print("AT+CMGD=0,4\r");
+  Serial1.print("AT+CMGD=0,4\r"); //this line deletes any existing text messages to ensure
+  //that the message space is empy and able to accept new messages
   delay(100);
   getResponse();
   Serial1.print("AT+CMGF=1\r");
-  //PUT TEST MESSAGE HERE
   delay(100);
   getResponse();
-  Serial1.print("AT+CNMI=2,2,0,0,0\r");
+  Serial1.print("AT+CNMI=2,2,0,0,0\r"); //
   delay(100);
   getResponse();
+  //the sendSMS function takes four parameters.
   sendSMS(urlHeaderArray, contactFromArray1, contactToArray1, SetCombody);
   sendSMS(urlHeaderArray, contactFromArray1, contactToArray2, SetCombody);
   //sendSMS(urlHeaderArray, contactFromArray1, contactToArray3, SetCombody);
@@ -163,8 +172,14 @@ void loop()
 }
 
 void resetCounters()
+
+//This function will run once every cycle.  It checks
+//the state of each of the inputs and if they're not 
+//currently in an alarm state, it levels their counters, switches, and timers
+//all to zero.  
+
 {
-  if (primaryCutoff == LOW)
+  if (primaryCutoff == LOW) //if no voltage coming from primary low water alarm:
   {
     alarmSwitch = false;
     difference = 0;
@@ -190,7 +205,7 @@ void resetCounters()
   {
     counter4 = 0;
   }
-  //this next line may not be necessary, but I think it will help prevent against false alarms on HPLC
+  //this next line may not be necessary, but I think it will help prevent against false alarms on hlpc
   if (hlpcCOMMON == LOW)
   {
     counter4 = 1;
@@ -382,7 +397,7 @@ void sendSMS(char pt1[], char pt2[], char pt3[], char pt4[])
 {
 
   char finalURL[250] = "";
-  
+
   strcpy(finalURL, pt1);
   strcat(finalURL, pt2);
   strcat(finalURL, pt3);
@@ -514,7 +529,7 @@ void loadContacts()
 
   myFile = SD.open("from1.txt");
   if (myFile) {
-    Serial.println("phone number command 1");
+    Serial.println("pull phone number 1 from SD");
     // read from the file until there's nothing else in it:
     while (myFile.available()) {
       char c = myFile.read();  //gets one byte from serial buffer
@@ -693,7 +708,7 @@ void readModbus()
         break;
       case 29:
         sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, "Body=Code29%20Interlock\"\r" );
-
+        break;
       default:
         sendSMS(urlHeaderArray, contactToArray1, contactFromArray1, "Body=Check%20fault%20code\"\r" );
         break;
