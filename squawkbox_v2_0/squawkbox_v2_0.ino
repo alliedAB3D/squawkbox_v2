@@ -1,5 +1,3 @@
-// clinton's edit branch
-
 #include <SD.h>
 #include <ModbusMaster.h>
 File myFile;
@@ -164,7 +162,7 @@ void loop()
   hlpcNC = digitalRead(hplcOUT);
   currentMillis = millis();
 
-  resetCounters();
+  resetCounters();  //EDIT THIS FUNCTION OUT.  Reset counter to 0 in the individual alarm functions.
   primary_LW();
   secondary_LW();
   Honeywell_alarm();
@@ -173,7 +171,7 @@ void loop()
   SMSRequest();
 }
 
-void resetCounters()
+void resetCounters()  //THIS FUNCTION NEEDS TO BE EDITED OUT
 
 //This function will run once every cycle.  It checks
 //the state of each of the inputs and if they're not 
@@ -429,12 +427,10 @@ void sendSMS(char pt1[], char pt2[], char pt3[], char pt4[])
   Serial1.print("AT+HTTPACTION=1\r");
   delay(5000);
   getResponse();
-
-  getResponse();
 }
 void getResponse()
 {
-  //comment here
+
   if (Serial1.available())
   {
     while (Serial1.available())
